@@ -14,7 +14,7 @@ SPOTIPY_CLIENT_SECRET = os.getenv("SPOTIPY_CLIENT_SECRET")
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = "WOrnwofwcwfrer42"
-app.config['SESSION_COOKIE_NAME'] = 'Spotify Calendar'
+app.config['SESSION_COOKIE_NAME'] = 'Spotify Top Artist Trivia'
 TOKEN_INFO = "token_info"
 
 def create_spotify_oauth():

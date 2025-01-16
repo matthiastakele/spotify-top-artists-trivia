@@ -12,9 +12,9 @@ requires = [
 ]
 
 setup(
-    name='SpotifyCalendar',
+    name='SpotifyTopArtistsTrivia',
     version='1.0',
-    description='An application to display your top Spotify daily and monthly listening in a calendar format',
+    description='An application to test your knowledge on your top Spotify artists',
     author = 'Matthias Takele',
     packages = find_packages(),
     include_package_data=True,
