@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to Spotify Top Artists Trivia{% endblock %}
+
+{% block content %}
+    <div class="container-fluid d-flex flex-column justify-content-center align-items-center vh-100" 
+         style="background: linear-gradient(135deg, #1e3c72, #2a5298); color: #fff; padding: 20px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);">
+        <div class="text-center" style="animation: fadeIn 1s ease-in-out;">
+            <h1 class="display-3" style="font-family: 'Montserrat', sans-serif; font-weight: bold; text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);">
+                Welcome to <span style="color: #1db954;">Spotify Top Artists Trivia</span>!
+            </h1>
+            <p class="lead mt-4" style="font-family: 'Raleway', sans-serif; font-size: 1.3rem;">
+                How well do you know your Spotify favorites? Put your music knowledge to the test!
+            </p>
+        </div>
+
+        <!-- Conditional Button -->
+        {% if logged_in %}
+            <!-- Direct to game if logged in -->
+            <a href="{{ url_for('pickTopArtist') }}" class="btn btn-lg mt-5 px-5 py-3" 
+               style="background: #1db954; color: #fff; font-family: 'Montserrat', sans-serif; font-size: 1.5rem; font-weight: bold; border-radius: 30px; box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                Start the Trivia
+            </a>
+        {% else %}
+            <!-- Redirect to login if not logged in -->
+            <a href="{{ url_for('login') }}" class="btn btn-lg mt-5 px-5 py-3" 
+               style="background: #1db954; color: #fff; font-family: 'Montserrat', sans-serif; font-size: 1.5rem; font-weight: bold; border-radius: 30px; box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3); transition: transform 0.3s ease, box-shadow 0.3s ease;">
+                Start the Trivia
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="container mt-5 text-center">
+        <div class="row text-center" style="color: #f5f5f5; font-family: 'Raleway', sans-serif;">
+            <div class="col-md-4">
+                <i class="fas fa-headphones-alt fa-3x" style="color: #1db954; transition: transform 0.3s;"></i>
+                <h4 class="mt-2">Test Your Music Knowledge</h4>
+            </div>
+            <div class="col-md-4">
+                <i class="fas fa-star fa-3x" style="color: #ffcc00; transition: transform 0.3s;"></i>
+                <h4 class="mt-2">Track Your Top Artists</h4>
+            </div>
+            <div class="col-md-4">
+                <i class="fas fa-trophy fa-3x" style="color: #f39c12; transition: transform 0.3s;"></i>
+                <h4 class="mt-2">Compete for the Best Score</h4>
+            </div>
+        </div>
+    </div>
+{% endblock %}

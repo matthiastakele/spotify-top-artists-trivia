@@ -1,0 +1,55 @@
+/* Global Font Family */
+body {
+    font-family: 'Raleway', sans-serif;
+    background-color: #222222; /* Dark background for modern look */
+    color: #fff; /* White text for contrast */
+    margin: 0;
+    padding: 0;
+}
+
+/* Animation for the welcome text */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Button Hover Effects */
+.btn:hover {
+    background-color: #fff;
+    color: #1db954;
+    transform: scale(1.1);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+/* Icon Hover Effects */
+.row i:hover {
+    transform: scale(1.2);
+    transition: transform 0.3s ease;
+}
+
+/* Centering Content for Full-Screen Design */
+.container-fluid {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+/* Text Shadows for Vibrancy */
+h1, h4 {
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Adjust the Icon Section */
+.row.text-center {
+    margin-top: 50px;
+}

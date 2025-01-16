@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Pick Your Top Artist{% endblock %}
+
+{% block content %}
+    <div class="container my-5">
+        <h2 class="text-center mb-4" style="font-family: 'Montserrat', sans-serif; font-weight: bold; color: #f8f9fa;;">
+            Pick One of Your Favorite Artists for Spotify Trivia!
+        </h2>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for artist in top_artists %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm" style="border: 1px solid #ccc; border-radius: 15px; overflow: hidden;">
+                        <!-- Larger image -->
+                        <img src="{{ artist['images'][0]['url'] }}" alt="{{ artist['name'] }}" 
+                             class="card-img-top" style="height: 300px; object-fit: cover;">
+                        
+                        <!-- Card content -->
+                        <div class="card-body text-center" style="background-color: #f8f9fa;">
+                            <h5 class="card-title mb-3" style="font-family: 'Montserrat', sans-serif; font-size: 1.5rem; font-weight: bold; color: #333;">
+                                {{ artist['name'] }}
+                            </h5>
+                            <!-- Modern button -->
+                            <form action="{{ url_for('selectArtist') }}" method="post">
+                                <input type="hidden" name="artist_id" value="{{ artist['id'] }}">
+                                <button type="submit" 
+                                        class="btn mt-3 px-4 py-2" 
+                                        style="background-color: #1db954; color: white; font-family: 'Montserrat', sans-serif; font-size: 1.2rem; font-weight: bold; border-radius: 25px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); transition: transform 0.2s ease, box-shadow 0.2s ease;">
+                                    Select
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Add hover effects for the buttons -->
+    <style>
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+{% endblock %}

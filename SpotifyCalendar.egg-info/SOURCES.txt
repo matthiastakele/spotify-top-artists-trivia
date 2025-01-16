@@ -1,0 +1,6 @@
+setup.py
+SpotifyCalendar.egg-info/PKG-INFO
+SpotifyCalendar.egg-info/SOURCES.txt
+SpotifyCalendar.egg-info/dependency_links.txt
+SpotifyCalendar.egg-info/requires.txt
+SpotifyCalendar.egg-info/top_level.txt
