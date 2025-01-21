@@ -1,8 +1,88 @@
 {% extends 'base.html' %}
 
+{% block title %}Trivia - {{ artist['name'] }}{% endblock %}
+
 {% block content %}
-    <h2>Debugging Artist Data</h2>
-    <pre>
-        {{ artist | safe }}
-    </pre>
+    <div class="container my-5">
+        <h2 class="text-center" style="color: #1db954; font-family: 'Montserrat', sans-serif; font-weight: bold;">
+            Trivia for {{ artist['name'] }}
+        </h2>
+
+        <!-- Artist Image -->
+        <div class="text-center mt-4">
+            {% if artist['images'] and artist['images'][0] %}
+                <img src="{{ artist['images'][0]['url'] }}" alt="{{ artist['name'] }}" 
+                     style="max-height: 200px; object-fit: cover; border-radius: 15px; box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);">
+            {% endif %}
+        </div>
+
+        <!-- Trivia Introduction -->
+        <div class="mt-5 text-center">
+            <h4 style="color: #f8f9fa; font-family: 'Raleway', sans-serif; font-size: 1.3rem;">
+                Answer the following questions to test your knowledge about {{ artist['name'] }}!
+            </h4>
+        </div>
+
+        <!-- Display Questions -->
+        <form action="{{ url_for('submitTrivia') }}" method="post" class="mt-4">
+            {% for question in questions %}
+                {% set outer_loop = loop %}
+                <div class="question-container mt-4" style="padding: 20px; border-radius: 15px; background-color: #1e1e1e; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);">
+                    <h5 style="color: #fff; font-family: 'Montserrat', sans-serif; font-weight: bold;">
+                        {{ outer_loop.index }}. {{ question['question'] }}
+                    </h5>
+                    <div class="choices mt-3">
+                        {% for option in question['options'] %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" 
+                                       name="question_{{ outer_loop.index }}" 
+                                       id="question_{{ outer_loop.index }}_option_{{ loop.index }}" 
+                                       value="{{ option }}" required>
+                                <label class="form-check-label" 
+                                       for="question_{{ outer_loop.index }}_option_{{ loop.index }}" 
+                                       style="color: #f8f9fa; font-family: 'Raleway', sans-serif;">
+                                    {{ option }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+
+            <!-- Submit Button -->
+            <div class="text-center mt-5">
+                <button type="submit" class="btn btn-lg px-5 py-3" 
+                        style="background-color: #1db954; color: white; font-family: 'Montserrat', sans-serif; font-weight: bold; border-radius: 30px; box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);">
+                    Submit Answers
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Add some CSS styling -->
+    <style>
+        body {
+            background-color: #121212; /* Spotify dark background */
+        }
+
+        .question-container {
+            margin-bottom: 20px;
+        }
+
+        .form-check-input:checked {
+            background-color: #1db954;
+            border-color: #1db954;
+        }
+
+        .form-check-label:hover {
+            color: #1db954;
+            transition: color 0.2s ease-in-out;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+    </style>
 {% endblock %}

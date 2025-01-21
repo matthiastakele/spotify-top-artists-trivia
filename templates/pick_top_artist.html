@@ -4,32 +4,35 @@
 
 {% block content %}
     <div class="container my-5">
-        <h2 class="text-center mb-4" style="font-family: 'Montserrat', sans-serif; font-weight: bold; color: #f8f9fa;;">
+        <h2 class="text-center mb-4" style="font-family: 'Montserrat', sans-serif; font-weight: bold; color: #f8f9fa;">
             Pick One of Your Favorite Artists for Spotify Trivia!
         </h2>
 
         <div class="row row-cols-1 row-cols-md-3 g-4">
             {% for artist in top_artists %}
                 <div class="col">
-                    <div class="card h-100 shadow-sm" style="border: 1px solid #ccc; border-radius: 15px; overflow: hidden;">
-                        <!-- Larger image -->
-                        <img src="{{ artist['images'][0]['url'] }}" alt="{{ artist['name'] }}" 
-                             class="card-img-top" style="height: 300px; object-fit: cover;">
-                        
-                        <!-- Card content -->
-                        <div class="card-body text-center" style="background-color: #f8f9fa;">
-                            <h5 class="card-title mb-3" style="font-family: 'Montserrat', sans-serif; font-size: 1.5rem; font-weight: bold; color: #333;">
+                    <!-- Form wraps only hidden inputs -->
+                    <form action="{{ url_for('selectArtist') }}" method="post" id="form-{{ loop.index }}">
+                        <input type="hidden" name="artist_id" value="{{ artist['id'] }}">
+                    </form>
+
+                    <!-- Clickable Card -->
+                    <div class="card h-100 shadow-lg position-relative" 
+                         style="border-radius: 15px; overflow: hidden; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease;" 
+                         onclick="document.getElementById('form-{{ loop.index }}').submit();">
+                        <!-- Full image with fixed dimensions -->
+                        <div style="width: 100%; height: 300px; position: relative; overflow: hidden;">
+                            <img src="{{ artist['images'][0]['url'] }}" alt="{{ artist['name'] }}" 
+                                 style="width: 100%; height: 100%; object-fit: cover; filter: brightness(70%);">
+                        </div>
+
+                        <!-- Overlay content -->
+                        <div class="card-img-overlay d-flex flex-column justify-content-end align-items-center" style="padding: 20px;">
+                            <!-- Artist Name -->
+                            <h5 class="card-title text-center mb-3" 
+                                style="font-family: 'Montserrat', sans-serif; font-size: 1.5rem; font-weight: bold; color: #fff; text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);">
                                 {{ artist['name'] }}
                             </h5>
-                            <!-- Modern button -->
-                            <form action="{{ url_for('selectArtist') }}" method="post">
-                                <input type="hidden" name="artist_id" value="{{ artist['id'] }}">
-                                <button type="submit" 
-                                        class="btn mt-3 px-4 py-2" 
-                                        style="background-color: #1db954; color: white; font-family: 'Montserrat', sans-serif; font-size: 1.2rem; font-weight: bold; border-radius: 25px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); transition: transform 0.2s ease, box-shadow 0.2s ease;">
-                                    Select
-                                </button>
-                            </form>
                         </div>
                     </div>
                 </div>
@@ -37,11 +40,23 @@
         </div>
     </div>
 
-    <!-- Add hover effects for the buttons -->
+    <!-- Hover effect for the card -->
     <style>
-        button:hover {
-            transform: scale(1.05);
+        .card:hover {
+            transform: scale(1.03);
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Ensure consistent image dimensions */
+        .card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Remove focus outline when clicking */
+        .card:focus {
+            outline: none;
         }
     </style>
 {% endblock %}
