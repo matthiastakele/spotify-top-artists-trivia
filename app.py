@@ -44,17 +44,22 @@ def get_token():
 
 @app.route('/')
 def login():
+    session.clear()
     sp_oauth = create_spotify_oauth()
     auth_url = sp_oauth.get_authorize_url()
-    return redirect(auth_url)
+    response = make_response(redirect(auth_url))
+    response.set_cookie('oauth_state', '', expires=0)
+    return response
 
 @app.route('/redirect')
 def redirectPage():
     sp_oauth = create_spotify_oauth()
     session.clear()
+
     code = request.args.get('code')
     if not code:
         return "Authorization code not received.", 400
+
     token_info = sp_oauth.get_access_token(code)
     session[TOKEN_INFO] = token_info
     return redirect(url_for('pickTopArtist'))
@@ -321,8 +326,8 @@ def submitTrivia():
     # Render results page
     return render_template(
         'results.html',
-        correct_percentage=correct_percentage,
-        incorrect_percentage=incorrect_percentage,
+        correct_percentage=str(round(correct_percentage,2)),
+        incorrect_percentage=str(round(incorrect_percentage,2)),
         total_questions=total_questions,
         correct_answers=correct_answers,
         incorrect_answers=total_questions - correct_answers,
@@ -337,11 +342,34 @@ def home():
 
 @app.route('/logout')
 def logout():
-    session.pop(TOKEN_INFO, None)
-    session.clear()
-    resp = make_response(redirect('/home'))
-    resp.set_cookie(app.config['SESSION_COOKIE_NAME'], '', expires=0)
-    return resp
+    try:
+        # Clear all session data
+        session.clear()
+        
+        # Create response for redirect
+        response = make_response(redirect(url_for('home')))
+        
+        # Clear all cookies
+        for cookie in request.cookies:
+            response.delete_cookie(cookie)
+            
+        # Clear specific Spotify cookies
+        response.set_cookie(app.config['SESSION_COOKIE_NAME'], '', expires=0)
+        response.set_cookie('oauth_state', '', expires=0)
+        
+        # Set cache control headers
+        response.headers.add('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0')
+        response.headers.add('Pragma', 'no-cache')
+        response.headers.add('Expires', '-1')
+        
+        return response
+
+    except Exception as e:
+        print(f"Logout error: {e}")
+        session.clear()
+        response = make_response(redirect(url_for('home')))
+        response.set_cookie(app.config['SESSION_COOKIE_NAME'], '', expires=0)
+        return response
 
 if __name__ == '__main__':
     app.run( )
