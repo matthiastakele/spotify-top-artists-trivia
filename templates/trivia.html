@@ -4,7 +4,7 @@
 
 {% block content %}
     <div class="container my-5">
-        <h2 class="text-center" style="color: #1db954; font-family: 'Montserrat', sans-serif; font-weight: bold;">
+        <h2 class="text-center" style="color: #fff; font-family: 'Montserrat', sans-serif; font-weight: bold;">
             Trivia for {{ artist['name'] }}
         </h2>
 
@@ -12,7 +12,7 @@
         <div class="text-center mt-4">
             {% if artist['images'] and artist['images'][0] %}
                 <img src="{{ artist['images'][0]['url'] }}" alt="{{ artist['name'] }}" 
-                     style="max-height: 200px; object-fit: cover; border-radius: 15px; box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4);">
+                     style="max-height: 200px; object-fit: cover; border-radius: 15px; box-shadow: 0 8px 15px rgba(0, 0, 0, 0.4); border: 1px solid #fff">
             {% endif %}
         </div>
 
