@@ -13,6 +13,7 @@ load_dotenv()
 
 SPOTIPY_CLIENT_ID = os.getenv("SPOTIPY_CLIENT_ID")
 SPOTIPY_CLIENT_SECRET = os.getenv("SPOTIPY_CLIENT_SECRET")
+SPOTIPY_REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -24,7 +25,7 @@ def create_spotify_oauth():
     return SpotifyOAuth(
         client_id=SPOTIPY_CLIENT_ID,
         client_secret=SPOTIPY_CLIENT_SECRET,
-        redirect_uri="https://spotify-top-artists-trivia.onrender.com/redirect",
+        redirect_uri=SPOTIPY_REDIRECT_URI,
         scope="user-top-read user-library-read",
         cache_path=None
     )
