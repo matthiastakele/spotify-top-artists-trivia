@@ -24,7 +24,7 @@ def create_spotify_oauth():
     return SpotifyOAuth(
         client_id=SPOTIPY_CLIENT_ID,
         client_secret=SPOTIPY_CLIENT_SECRET,
-        redirect_uri=url_for('redirectPage', _external=True),
+        redirect_uri="https://spotify-top-artists-trivia.onrender.com/redirect",
         scope="user-top-read user-library-read",
         cache_path=None
     )
