@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Results{% endblock %}
+
+{% block content %}
+<div class="container my-5 text-center">
+    <h2 class="mb-4" style="color: #fff; font-family: 'Montserrat', sans-serif; font-weight: bold;">
+        Trivia Results
+    </h2>
+
+    <div class="card shadow-lg p-4 mb-5" style="border-radius: 15px; background-color: #1e1e1e; color: #fff;">
+        <h3>You answered {{ correct_answers }} out of {{ total_questions }} questions correctly!</h3>
+        <p style="font-family: 'Raleway', sans-serif; font-size: 1.2rem;">
+            Correct: {{ correct_percentage }}%<br>
+            Incorrect: {{ incorrect_percentage }}%
+        </p>
+    </div>
+
+    <h4 class="text-center mb-4" style="color: #fff; font-family: 'Raleway', sans-serif; font-size: 1.5rem;">
+        Recap of Your Answers:
+    </h4>
+
+    <div class="recap-list">
+        {% for item in recap %}
+            <div class="card shadow-sm mb-4 p-3" style="border-radius: 10px; background-color: #1e1e1e; color: #fff;">
+                <h5 style="font-family: 'Montserrat', sans-serif; font-weight: bold; color: #fff;">{{ item.question }}</h5>
+                <p style="font-family: 'Raleway', sans-serif; font-size: 1.1rem;">
+                    <strong>Your Answer:</strong> 
+                    <span style="color: {{ 'green' if item.is_correct else 'red' }};">
+                        {{ item.user_answer }}
+                    </span><br>
+                    <strong>Correct Answer:</strong> {{ item.correct_answer }}
+                </p>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-5">
+        <a href="{{ url_for('trivia') }}" class="btn btn-lg px-4 py-2" 
+           style="background-color: #1db954; color: white; font-family: 'Montserrat', sans-serif; font-weight: bold; border-radius: 30px; box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);">
+            Play Again
+        </a>
+        <a href="{{ url_for('home') }}" class="btn btn-lg px-4 py-2 ms-3" 
+           style="background-color: #f44336; color: white; font-family: 'Montserrat', sans-serif; font-weight: bold; border-radius: 30px; box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);">
+            Back to Home
+        </a>
+    </div>
+</div>
+
+<style>
+    body {
+        background-color: #121212; /* Spotify dark background */
+    }
+
+    .card {
+        border: none;
+    }
+
+    .card h5 {
+        color: #1db954;
+    }
+
+    .recap-list {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}

@@ -275,6 +275,7 @@ def trivia():
         
         # Store albums_with_tracks in session for potential future use
         session['albums_with_tracks'] = generator.albums_with_tracks
+        session['questions'] = questions
         
         return render_template('trivia.html', 
                              artist=generator.artist_info, 
@@ -285,8 +286,48 @@ def trivia():
 
 @app.route('/submitTrivia', methods=['POST'])
 def submitTrivia():
-    # Retrieve questions from session
+    # Retrieve questions and correct answers from session or context
     questions = session.get('questions', [])
+    total_questions = len(questions)
+
+    if not questions:
+        return redirect(url_for('trivia'))  # Redirect back if no questions found
+
+    # Process form data
+    correct_answers = 0
+    recap = []
+
+    for i, question in enumerate(questions, start=1):
+        user_answer = str(request.form.get(f"question_{i}")).replace(',','')
+        question_answer = str(question['answer'])
+        is_correct = user_answer == question_answer
+
+        if is_correct:
+            correct_answers += 1
+
+        # Add to recap for detailed results
+        recap.append({
+            "question": question['question'],
+            "user_answer": user_answer,
+            "correct_answer": question['answer'],
+            "is_correct": is_correct
+        })
+
+    # Calculate percentage of correct and incorrect answers
+    correct_percentage = (correct_answers / total_questions) * 100
+    incorrect_percentage = 100 - correct_percentage
+
+    # Render results page
+    return render_template(
+        'results.html',
+        correct_percentage=correct_percentage,
+        incorrect_percentage=incorrect_percentage,
+        total_questions=total_questions,
+        correct_answers=correct_answers,
+        incorrect_answers=total_questions - correct_answers,
+        recap=recap  # Pass recap to template
+    )
+
 
 @app.route('/home')
 def home():
