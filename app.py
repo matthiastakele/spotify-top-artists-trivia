@@ -17,7 +17,7 @@ SPOTIPY_REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
 
 # Initialize Flask app
 app = Flask(__name__)
-app.secret_key = "WOrnwofwcwfrer42"
+app.secret_key = os.getenv("APP_SECRET_KEY")
 app.config['SESSION_COOKIE_NAME'] = 'Spotify Top Artist Trivia'
 TOKEN_INFO = "token_info"
 
