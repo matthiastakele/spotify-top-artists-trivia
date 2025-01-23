@@ -7,7 +7,7 @@ import os
 import time
 import datetime
 import random
-import copy 
+import pymongo
 # Load environment variables
 load_dotenv()
 
@@ -31,6 +31,15 @@ def create_spotify_oauth():
         show_dialog=True
     )
 
+def create_demo_spotify_oauth():
+    return SpotifyOAuth(
+        client_id=SPOTIPY_CLIENT_ID,
+        client_secret=SPOTIPY_CLIENT_SECRET,
+        redirect_uri=SPOTIPY_REDIRECT_URI,
+        scope="user-top-read user-library-read",
+        cache_path=None,  # Ensure no caching
+    )
+
 def get_token():
     token_info = session.get(TOKEN_INFO)
     if not token_info:
@@ -46,10 +55,15 @@ def get_token():
 
     return token_info
 
+@app.route('/demo_login')
+def demo_login():
+    session['demo_login'] = True
+    sp_oauth = create_demo_spotify_oauth()
+    auth_url = sp_oauth.get_authorize_url()
+    return redirect(auth_url)
 
-@app.route('/')
+@app.route('/login')
 def login():
-    session.clear()  # Clear previous session data
     sp_oauth = create_spotify_oauth()
     auth_url = sp_oauth.get_authorize_url()
     return redirect(auth_url)
@@ -58,11 +72,12 @@ def login():
 def logout():
     # Clear the session on your application
     session.clear()
-
-    cache_path = os.path.join(os.getcwd(), ".cache")
-    if os.path.exists(cache_path):
-        os.remove(cache_path)
-        print("DEBUG: .cache file removed")
+    demo_login = session.get('demo_login', False)
+    if demo_login:
+        cache_path = os.path.join(os.getcwd(), ".cache")
+        if os.path.exists(cache_path):
+            os.remove(cache_path)
+            print("DEBUG: .cache file removed")
 
     return redirect(url_for('home'))
 
@@ -92,7 +107,6 @@ def redirectPage():
         sp = spotipy.Spotify(auth=token_info['access_token'])
         # Get current user's profile
         user_profile = sp.current_user()
-        print(user_profile['display_name'])
         session['USER_ID'] = user_profile['id']
 
         # Fetch and store top artists for the current user
@@ -381,7 +395,7 @@ def submitTrivia():
     )
 
 
-@app.route('/home')
+@app.route('/')
 def home():
     return render_template('home.html')
 
