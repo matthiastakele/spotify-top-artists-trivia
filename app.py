@@ -27,7 +27,8 @@ def create_spotify_oauth():
         client_secret=SPOTIPY_CLIENT_SECRET,
         redirect_uri=SPOTIPY_REDIRECT_URI,
         scope="user-top-read user-library-read",
-        cache_path=None
+        cache_path=None,  # Ensure no caching
+        show_dialog=True
     )
 
 def get_token():
@@ -44,12 +45,25 @@ def get_token():
 
 @app.route('/')
 def login():
-    session.clear()
+    session.clear()  # Clear previous session data
     sp_oauth = create_spotify_oauth()
     auth_url = sp_oauth.get_authorize_url()
-    response = make_response(redirect(auth_url))
-    response.set_cookie('oauth_state', '', expires=0)
-    return response
+    return redirect(auth_url)
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    resp = make_response(redirect(url_for('home')))  # Redirect to home page
+    resp.set_cookie(app.config['SESSION_COOKIE_NAME'], '', expires=0)  # Remove session cookie
+    return resp
+
+@app.context_processor
+def inject_logged_in():
+    token_info = session.get(TOKEN_INFO, None)
+    if token_info:
+        now = int(time.time())
+        return {"logged_in": token_info.get('expires_at', 0) > now}
+    return {"logged_in": False}
 
 @app.route('/redirect')
 def redirectPage():
@@ -73,7 +87,7 @@ def pickTopArtist():
         return render_template('pick_top_artist.html', top_artists=top_artists)
     except Exception as e:
         print(f"Error: {e}")
-        return redirect(url_for('home'))
+        return redirect(url_for('login'))
 
 @app.route('/selectArtist', methods=['POST'])
 def selectArtist():
@@ -104,12 +118,12 @@ class TriviaQuestionGenerator:
             }
         return albums_with_tracks
 
-    def _generate_diff_album_tracks(self, current_album: str, num_of_tracks: int = 3) -> List[str]:
+    def _generate_diff_album_tracks(self, correct_track: str, correct_album: str, num_of_tracks: int = 3) -> List[str]:
         """Generate tracks from different albums for wrong options."""
         tracks = []
         shuffled_albums = random.sample(list(self.albums_with_tracks.keys()), len(self.albums_with_tracks))
         for album in shuffled_albums:
-            if album == current_album or album.startswith(current_album) or current_album.startswith(album):
+            if album == correct_album or album.startswith(correct_album) or correct_album.startswith(album):
                 shuffled_albums.remove(album)
     
         if len(shuffled_albums) >= 1:
@@ -118,7 +132,7 @@ class TriviaQuestionGenerator:
                 diff_album = random.choice(shuffled_albums)
                 diff_track = random.choice(self.albums_with_tracks[diff_album]['tracks'])['name']
 
-                if diff_track not in selected_tracks:
+                if diff_track not in selected_tracks and diff_track != correct_track:
                     selected_tracks.add(diff_track)
                     tracks.append(diff_track)
 
@@ -169,7 +183,7 @@ class TriviaQuestionGenerator:
         for album_name, details in self.albums_with_tracks.items():
             if details['tracks']:
                 correct_track = random.choice(details['tracks'])['name']
-                diff_tracks = self._generate_diff_album_tracks(album_name)
+                diff_tracks = self._generate_diff_album_tracks(correct_track, album_name)
                 if not diff_tracks:
                     return {}
                 questions.append({
@@ -337,39 +351,7 @@ def submitTrivia():
 
 @app.route('/home')
 def home():
-    logged_in = TOKEN_INFO in session
-    return render_template('home.html', logged_in=logged_in)
-
-@app.route('/logout')
-def logout():
-    try:
-        # Clear all session data
-        session.clear()
-        
-        # Create response for redirect
-        response = make_response(redirect(url_for('home')))
-        
-        # Clear all cookies
-        for cookie in request.cookies:
-            response.delete_cookie(cookie)
-            
-        # Clear specific Spotify cookies
-        response.set_cookie(app.config['SESSION_COOKIE_NAME'], '', expires=0)
-        response.set_cookie('oauth_state', '', expires=0)
-        
-        # Set cache control headers
-        response.headers.add('Cache-Control', 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0')
-        response.headers.add('Pragma', 'no-cache')
-        response.headers.add('Expires', '-1')
-        
-        return response
-
-    except Exception as e:
-        print(f"Logout error: {e}")
-        session.clear()
-        response = make_response(redirect(url_for('home')))
-        response.set_cookie(app.config['SESSION_COOKIE_NAME'], '', expires=0)
-        return response
+    return render_template('home.html')
 
 if __name__ == '__main__':
     app.run()
