@@ -51,7 +51,7 @@ def get_token():
 
     # Check if the token is expired by comparing the current time with the token's expiry time
     now = int(time.time())
-    is_expired = token_info['expires_at'] - now < 60
+    is_expired = False
 
     if is_expired:
         # If the token is expired, refresh it
