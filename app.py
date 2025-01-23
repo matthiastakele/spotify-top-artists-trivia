@@ -32,16 +32,20 @@ def create_spotify_oauth():
     )
 
 def get_token():
-    token_info = session.get(TOKEN_INFO, None)
+    token_info = session.get(TOKEN_INFO)
     if not token_info:
         raise Exception("No token info found in session.")
+
     now = int(time.time())
-    is_expired = int(token_info['expires_at'] - now) < 60
+    is_expired = token_info['expires_at'] - now < 60
+
     if is_expired:
         sp_oauth = create_spotify_oauth()
         token_info = sp_oauth.refresh_access_token(token_info['refresh_token'])
         session[TOKEN_INFO] = token_info
+
     return token_info
+
 
 @app.route('/')
 def login():
@@ -52,10 +56,16 @@ def login():
 
 @app.route('/logout')
 def logout():
+    # Clear the session on your application
     session.clear()
-    resp = make_response(redirect(url_for('home')))  # Redirect to home page
-    resp.set_cookie(app.config['SESSION_COOKIE_NAME'], '', expires=0)  # Remove session cookie
-    return resp
+
+    cache_path = os.path.join(os.getcwd(), ".cache")
+    if os.path.exists(cache_path):
+        os.remove(cache_path)
+        print("DEBUG: .cache file removed")
+
+    return redirect(url_for('home'))
+
 
 @app.context_processor
 def inject_logged_in():
@@ -68,26 +78,48 @@ def inject_logged_in():
 @app.route('/redirect')
 def redirectPage():
     sp_oauth = create_spotify_oauth()
-    session.clear()
-
     code = request.args.get('code')
+
     if not code:
         return "Authorization code not received.", 400
 
-    token_info = sp_oauth.get_access_token(code)
-    session[TOKEN_INFO] = token_info
-    return redirect(url_for('pickTopArtist'))
+    try:
+        # Get new token info
+        token_info = sp_oauth.get_access_token(code)
+        session[TOKEN_INFO] = token_info
+
+        # Create Spotify client
+        sp = spotipy.Spotify(auth=token_info['access_token'])
+        # Get current user's profile
+        user_profile = sp.current_user()
+        print(user_profile['display_name'])
+        session['USER_ID'] = user_profile['id']
+
+        # Fetch and store top artists for the current user
+        top_artists = sp.current_user_top_artists(limit=12, time_range='medium_term')['items']
+        session['TOP_ARTISTS'] = top_artists
+
+        return redirect(url_for('pickTopArtist'))
+
+    except Exception as e:
+        print(f"Error during redirect: {e}")
+        return redirect(url_for('login'))
+
 
 @app.route('/pickTopArtist')
 def pickTopArtist():
     try:
-        token_info = get_token()
-        sp = spotipy.Spotify(auth=token_info['access_token'])
-        top_artists = sp.current_user_top_artists(limit=12, time_range='medium_term')['items']
+        user_id = session.get('USER_ID')
+        top_artists = session.get('TOP_ARTISTS')
+
+        if not user_id or not top_artists:
+            return redirect(url_for('login'))
+
         return render_template('pick_top_artist.html', top_artists=top_artists)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error in pickTopArtist: {e}")
         return redirect(url_for('login'))
+
 
 @app.route('/selectArtist', methods=['POST'])
 def selectArtist():
