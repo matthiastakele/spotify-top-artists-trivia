@@ -188,7 +188,7 @@ class TriviaQuestionGenerator:
         if artist_genres:
             artist_genre = artist_genres[0]
             all_genres = {'rock', 'pop', 'r&b', 'jazz', 'hip hop'}
-            other_genres = [genre for genre in random.sample(all_genres - {artist_genre}, 3)]
+            other_genres = [genre for genre in random.sample(list(all_genres - {artist_genre}), 3)]
             return {
                 "question": f"What genre is {self.artist_info['name']}'s music?",
                 "options": [artist_genre] + other_genres,
