@@ -19,7 +19,6 @@ SPOTIPY_REDIRECT_URI = os.getenv("SPOTIFY_REDIRECT_URI")
 app = Flask(__name__)
 app.secret_key = os.getenv("APP_SECRET_KEY")
 app.config['SESSION_COOKIE_NAME'] = 'Spotify Top Artist Trivia'
-TOKEN_INFO = "token_info"
 
 def create_spotify_oauth():
     return SpotifyOAuth(
@@ -41,19 +40,34 @@ def create_demo_spotify_oauth():
     )
 
 def get_token():
-    token_info = session.get(TOKEN_INFO)
-    if not token_info:
-        raise Exception("No token info found in session.")
+    # Get the user ID from the session to ensure we're handling the correct user
+    user_id = session.get('user_id')
+    if not user_id:
+        raise Exception("User not logged in.")
 
+    # Retrieve token info specific to the user from the session
+    token_info = session.get(f'token_info_{user_id}')
+    if not token_info:
+        raise Exception("No token info found in session for the user.")
+
+    # Check if the token is expired by comparing the current time with the token's expiry time
     now = int(time.time())
     is_expired = token_info['expires_at'] - now < 60
 
     if is_expired:
+        # If the token is expired, refresh it
         sp_oauth = create_spotify_oauth()
-        token_info = sp_oauth.refresh_access_token(token_info['refresh_token'])
-        session[TOKEN_INFO] = token_info
+        try:
+            # Refresh the access token
+            token_info = sp_oauth.refresh_access_token(token_info['refresh_token'])
+            # Update the session with the new token
+            session[f'token_info_{user_id}'] = token_info
+        except Exception as e:
+            print(f"Error refreshing access token: {e}")
+            raise Exception("Failed to refresh access token.")
 
     return token_info
+
 
 @app.route('/demo_login')
 def demo_login():
@@ -73,22 +87,29 @@ def logout():
     # Clear the session on your application
     session.clear()
     demo_login = session.get('demo_login', False)
-    if demo_login:
+    if not demo_login:
         cache_path = os.path.join(os.getcwd(), ".cache")
         if os.path.exists(cache_path):
             os.remove(cache_path)
-            print("DEBUG: .cache file removed")
 
     return redirect(url_for('home'))
 
 
 @app.context_processor
 def inject_logged_in():
-    token_info = session.get(TOKEN_INFO, None)
+    user_id = session.get('user_id')  # Get the user ID from session
+    if not user_id:
+        return {"logged_in": False}  # No user logged in
+
+    # Retrieve the token info specific to the user
+    token_info = session.get(f'token_info_{user_id}', None)
     if token_info:
         now = int(time.time())
+        # Check if token is still valid
         return {"logged_in": token_info.get('expires_at', 0) > now}
+    
     return {"logged_in": False}
+
 
 @app.route('/redirect')
 def redirectPage():
@@ -101,18 +122,24 @@ def redirectPage():
     try:
         # Get new token info
         token_info = sp_oauth.get_access_token(code)
-        session[TOKEN_INFO] = token_info
-
-        # Create Spotify client
+        
+        # Initialize Spotify client with the token
         sp = spotipy.Spotify(auth=token_info['access_token'])
+
         # Get current user's profile
         user_profile = sp.current_user()
-        session['USER_ID'] = user_profile['id']
+
+        # Store user_id in session
+        session['user_id'] = user_profile['id']
+
+        # Store token info with user_id in session
+        session[f'token_info_{user_profile["id"]}'] = token_info
 
         # Fetch and store top artists for the current user
         top_artists = sp.current_user_top_artists(limit=12, time_range='medium_term')['items']
-        session['TOP_ARTISTS'] = top_artists
+        session[f'top_artists_{user_profile["id"]}'] = top_artists
 
+        # Redirect to pickTopArtist page
         return redirect(url_for('pickTopArtist'))
 
     except Exception as e:
@@ -123,16 +150,19 @@ def redirectPage():
 @app.route('/pickTopArtist')
 def pickTopArtist():
     try:
-        user_id = session.get('USER_ID')
-        top_artists = session.get('TOP_ARTISTS')
+        user_id = session.get('user_id')
+        if not user_id:
+            return redirect(url_for('login'))
 
-        if not user_id or not top_artists:
+        top_artists = session.get(f'top_artists_{user_id}')
+        if not top_artists:
             return redirect(url_for('login'))
 
         return render_template('pick_top_artist.html', top_artists=top_artists)
     except Exception as e:
         print(f"Error in pickTopArtist: {e}")
         return redirect(url_for('login'))
+
 
 
 @app.route('/selectArtist', methods=['POST'])
