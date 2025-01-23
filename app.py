@@ -7,7 +7,6 @@ import os
 import time
 import datetime
 import random
-import pymongo
 # Load environment variables
 load_dotenv()
 
