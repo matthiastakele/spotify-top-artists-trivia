@@ -83,10 +83,9 @@ def login():
 
 @app.route('/logout')
 def logout():
-    # Clear the session on your application
-    session.clear()
     demo_login = session.get('demo_login', False)
     if not demo_login:
+        session.clear()
         cache_path = os.path.join(os.getcwd(), ".cache")
         if os.path.exists(cache_path):
             os.remove(cache_path)
