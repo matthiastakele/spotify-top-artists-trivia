@@ -15,9 +15,12 @@ Deployed for Scalability: Hosted on Vercel for fast and reliable performance.
 
 User Authentication:
 Users log in with their Spotify account via OAuth 2.0. The app retrieves their top artists, albums, and tracks using the Spotify Web API.
+
 Question Generation:
 Questions are dynamically generated based on the user's listening habits and preferences.
+
 Gameplay:
 Users answer trivia questions in a clean, interactive interface. Their answers are validated, and scores are displayed at the end.
+
 Results Display:
 A detailed breakdown of the user’s performance, including correct and incorrect answers, is provided at the end of the game.
