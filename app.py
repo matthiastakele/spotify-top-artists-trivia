@@ -367,10 +367,6 @@ def trivia():
         for q in questions:
             random.shuffle(q['options'])
         
-        # Store albums_with_tracks in session for potential future use
-        session['albums_with_tracks'] = generator.albums_with_tracks
-        session['questions'] = questions
-        
         return render_template('trivia.html', 
                              artist=generator.artist_info, 
                              questions=questions)
@@ -380,47 +376,43 @@ def trivia():
 
 @app.route('/submitTrivia', methods=['POST'])
 def submitTrivia():
-    # Retrieve questions and correct answers from session or context
-    questions = session.get('questions', [])
-    total_questions = len(questions)
+    # Retrieve all submitted form data
+    form_data = request.form
 
-    if not questions:
-        return redirect(url_for('trivia'))  # Redirect back if no questions found
+    # Extract questions and answers from form data
+    questions = []
+    total_questions = len([key for key in form_data if key.startswith("question_") and key.endswith("_text")])
 
-    # Process form data
-    correct_answers = 0
-    recap = []
+    for i in range(1, total_questions + 1):
+        question_text = form_data.get(f"question_{i}_text")
+        correct_answer = str(form_data.get(f"question_{i}_answer")).replace(',','')
+        user_answer = str(form_data.get(f"question_{i}")).replace(',','')
 
-    for i, question in enumerate(questions, start=1):
-        user_answer = str(request.form.get(f"question_{i}")).replace(',','')
-        question_answer = str(question['answer'])
-        is_correct = user_answer == question_answer
-
-        if is_correct:
-            correct_answers += 1
-
-        # Add to recap for detailed results
-        recap.append({
-            "question": question['question'],
+        is_correct = user_answer == correct_answer
+        questions.append({
+            "question": question_text,
             "user_answer": user_answer,
-            "correct_answer": question['answer'],
+            "correct_answer": correct_answer,
             "is_correct": is_correct
         })
 
-    # Calculate percentage of correct and incorrect answers
+    # Calculate results
+    correct_answers = sum(1 for q in questions if q["is_correct"])
+    incorrect_answers = total_questions - correct_answers
     correct_percentage = (correct_answers / total_questions) * 100
     incorrect_percentage = 100 - correct_percentage
 
     # Render results page
     return render_template(
         'results.html',
-        correct_percentage=str(round(correct_percentage,2)),
-        incorrect_percentage=str(round(incorrect_percentage,2)),
+        correct_percentage=round(correct_percentage, 2),
+        incorrect_percentage=round(incorrect_percentage, 2),
         total_questions=total_questions,
         correct_answers=correct_answers,
-        incorrect_answers=total_questions - correct_answers,
-        recap=recap  # Pass recap to template
+        incorrect_answers=incorrect_answers,
+        recap=questions  # Pass recap to template
     )
+
 
 
 @app.route('/')

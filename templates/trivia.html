@@ -31,6 +31,9 @@
                     <h5 style="color: #fff; font-family: 'Montserrat', sans-serif; font-weight: bold;">
                         {{ outer_loop.index }}. {{ question['question'] }}
                     </h5>
+                    <!-- Hidden Inputs for Question Text and Answer -->
+                    <input type="hidden" name="question_{{ outer_loop.index }}_text" value="{{ question['question'] }}">
+                    <input type="hidden" name="question_{{ outer_loop.index }}_answer" value="{{ question['answer'] }}">
                     <div class="choices mt-3">
                         {% for option in question['options'] %}
                             <div class="form-check">
