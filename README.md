@@ -21,28 +21,3 @@ Gameplay:
 Users answer trivia questions in a clean, interactive interface. Their answers are validated, and scores are displayed at the end.
 Results Display:
 A detailed breakdown of the user’s performance, including correct and incorrect answers, is provided at the end of the game.
-
-🖥️ Installation
-
-1. Clone the Repository
-git clone https://github.com/yourusername/spotify-trivia-game.git  
-cd spotify-trivia-game  
-2. Set Up Environment
-Ensure you have Python 3.8+ installed.
-Install dependencies:
-pip install -r requirements.txt  
-3. Create a Spotify App
-Go to the Spotify Developer Dashboard.
-Create a new app and note the Client ID and Client Secret.
-Set the redirect URI to http://127.0.0.1:5000/callback.
-4. Configure Environment Variables
-Create a .env file in the project root and add the following:
-
-SPOTIFY_CLIENT_ID=your_spotify_client_id  
-SPOTIFY_CLIENT_SECRET=your_spotify_client_secret  
-SPOTIFY_REDIRECT_URI=http://127.0.0.1:5000/callback  
-FLASK_APP=app.py  
-FLASK_ENV=development  
-SECRET_KEY=your_secret_key  
-5. Run the Application
-flask run  
